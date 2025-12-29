@@ -1,0 +1,386 @@
+import { useState, useEffect } from 'react';
+
+const Financial = () => {
+  const [financialData, setFinancialData] = useState({
+    totalEarnings: 0,
+    totalOrders: 0,
+    totalTransactions: 0,
+    pendingPayments: 0,
+    bookings: [],
+    transactions: [],
+    monthlyEarnings: [],
+    paymentMethodData: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+
+  useEffect(() => {
+    fetchFinancialData();
+  }, [selectedPeriod, selectedStatus]);
+
+  const fetchFinancialData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/admin/financial/data?period=${selectedPeriod}&status=${selectedStatus}`);
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setFinancialData(result.data);
+        } else {
+          // If no data, show empty state instead of dummy data
+          setFinancialData({
+            totalEarnings: 0,
+            totalOrders: 0,
+            totalTransactions: 0,
+            pendingPayments: 0,
+            bookings: [],
+            transactions: [],
+            monthlyEarnings: [],
+            paymentMethodData: []
+          });
+        }
+      } else {
+        // If API fails, show empty state instead of dummy data
+        setFinancialData({
+          totalEarnings: 0,
+          totalOrders: 0,
+          totalTransactions: 0,
+          pendingPayments: 0,
+          bookings: [],
+          transactions: [],
+          monthlyEarnings: [],
+          paymentMethodData: []
+        });
+      }
+      setError(null);
+    } catch (err) {
+      console.error('Financial data fetch error:', err);
+      setError(err.message);
+      // Set empty data on error instead of dummy data
+      setFinancialData({
+        totalEarnings: 0,
+        totalOrders: 0,
+        totalTransactions: 0,
+        pendingPayments: 0,
+        bookings: [],
+        transactions: [],
+        monthlyEarnings: [],
+        paymentMethodData: []
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const exportToExcel = async () => {
+    try {
+      const csvContent = [
+        ['Date', 'Booking ID', 'Customer', 'Vehicle', 'Amount', 'Status', 'Payment Method'],
+        ...financialData.bookings.map(booking => [
+          booking.bookingDate,
+          booking.bookingId,
+          booking.customerName,
+          booking.vehicleName,
+          booking.amount,
+          booking.status,
+          booking.paymentMethod
+        ])
+      ].map(row => row.join(',')).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `financial-data-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const exportToPDF = async () => {
+    try {
+      const response = await fetch('/api/admin/financial/export-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'financial',
+          data: financialData,
+          period: selectedPeriod,
+          status: selectedStatus,
+          title: 'Financial Report'
+        })
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        
+        if (blob.size === 0) {
+          throw new Error('Received empty PDF file');
+        }
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        return;
+      } else {
+        throw new Error(`Server error: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PDF service error:', error);
+      
+      // Fallback to text report
+      const reportContent = `
+DriveO Financial Report
+Generated on: ${new Date().toLocaleDateString()}
+
+=== FINANCIAL SUMMARY ===
+Total Earnings: ₹${financialData.totalEarnings.toLocaleString()}
+Total Orders: ${financialData.totalOrders}
+Total Transactions: ${financialData.totalTransactions}
+Pending Payments: ₹${financialData.pendingPayments.toLocaleString()}
+
+=== MONTHLY EARNINGS ===
+${financialData.monthlyEarnings.map(month => 
+  `${month.month}: ₹${month.earnings.toLocaleString()}`
+).join('\n')}
+
+=== PAYMENT METHODS ===
+${financialData.paymentMethodData.map(method => 
+  `${method.name}: ${method.value}%`
+).join('\n')}
+
+=== REPORT END ===
+Generated by DriveO Financial System
+      `;
+
+      const blob = new Blob([reportContent], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `financial-report-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR'
+    }).format(amount);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <span className="ml-3 text-gray-600">Loading financial data...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <strong>Error:</strong> {error}
+          <button 
+            onClick={fetchFinancialData}
+            className="ml-4 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-800">Financial Dashboard</h1>
+        
+        {/* Export Buttons */}
+        <div className="flex space-x-3">
+          <button
+            onClick={exportToExcel}
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
+          >
+            <span>📊</span>
+            <span>Export Excel</span>
+          </button>
+          <button
+            onClick={exportToPDF}
+            className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
+          >
+            <span>📄</span>
+            <span>Export PDF</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-lg shadow-md">
+        <div className="flex space-x-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Period</label>
+            <select
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Status</option>
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Financial Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 p-6 rounded-2xl text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm font-medium">Total Earnings</p>
+              <p className="text-2xl font-bold">{formatCurrency(financialData.totalEarnings)}</p>
+            </div>
+            <div className="text-3xl opacity-80">💰</div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 p-6 rounded-2xl text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium">Total Orders</p>
+              <p className="text-2xl font-bold">{financialData.totalOrders}</p>
+            </div>
+            <div className="text-3xl opacity-80">📋</div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 p-6 rounded-2xl text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm font-medium">Transactions</p>
+              <p className="text-2xl font-bold">{financialData.totalTransactions}</p>
+            </div>
+            <div className="text-3xl opacity-80">💳</div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-orange-400 via-red-500 to-pink-600 p-6 rounded-2xl text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-100 text-sm font-medium">Pending Payments</p>
+              <p className="text-2xl font-bold">{formatCurrency(financialData.pendingPayments)}</p>
+            </div>
+            <div className="text-3xl opacity-80">⏳</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Simple Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Monthly Earnings - Simple Bar Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Monthly Earnings Trend</h3>
+          <div className="space-y-3">
+            {financialData.monthlyEarnings.map((month, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-600">{month.month}</span>
+                <div className="flex items-center space-x-2">
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-500 h-2 rounded-full" 
+                      style={{ width: `${(month.earnings / 50000) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-800">
+                    {formatCurrency(month.earnings)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Payment Methods - Simple Progress Bars */}
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Payment Methods</h3>
+          <div className="space-y-4">
+            {financialData.paymentMethodData.map((method, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-gray-600">{method.name}</span>
+                  <span className="text-sm font-semibold text-gray-800">{method.value}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="h-2 rounded-full" 
+                    style={{ 
+                      width: `${method.value}%`,
+                      backgroundColor: method.color 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Section */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Financial Summary</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-green-600">
+              {formatCurrency(financialData.totalEarnings)}
+            </div>
+            <div className="text-sm text-gray-600">Total Revenue</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-blue-600">
+              {financialData.totalOrders}
+            </div>
+            <div className="text-sm text-gray-600">Completed Orders</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-orange-600">
+              {formatCurrency(financialData.pendingPayments)}
+            </div>
+            <div className="text-sm text-gray-600">Pending Payments</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Financial;
