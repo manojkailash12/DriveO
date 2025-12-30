@@ -139,6 +139,23 @@ App.get('/api/test', (req, res) => {
   });
 });
 
+// Root route handler
+App.get('/', (req, res) => {
+  res.json({
+    message: 'DriveO Backend API is running!',
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/api/health',
+      test: '/api/test',
+      auth: '/api/auth',
+      user: '/api/user',
+      admin: '/api/admin',
+      vendor: '/api/vendor'
+    }
+  });
+});
+
 // Database health check route
 App.get('/api/health', async (req, res) => {
   try {
