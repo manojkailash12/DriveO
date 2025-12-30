@@ -17,8 +17,8 @@ import { startQueueProcessor } from "./services/offlineQueueService.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables from the correct path
-dotenv.config({ path: path.join(__dirname, '.env') });
+// Load environment variables - Vercel handles this automatically
+dotenv.config();
 
 const App = express();
 
@@ -171,7 +171,6 @@ App.use("/api/user", userRoute);
 App.use("/api/auth", authRoute);
 App.use("/api/admin",adminRoute);
 App.use("/api/vendor",vendorRoute);
-App.use("/api/masterdata", masterDataRoute);
 App.use("/api/test", testRoute);
 
 App.use((err, req, res, next) => {
@@ -183,3 +182,6 @@ App.use((err, req, res, next) => {
     statusCode,
   });
 });
+
+// Export for Vercel serverless functions
+export default App;
