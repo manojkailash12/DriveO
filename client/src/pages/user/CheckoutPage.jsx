@@ -222,44 +222,44 @@ const CheckoutPage = () => {
           },
         }}
       />
-      <div className="grid w-full absolute top-0  sm:px-10 lg:grid-cols-2 lg:px-20 xl:px-[120px] xl:pl-[100px] gap-10 xl:mt-20 ">
-        <div className="px-4  bg-gray w-full h-full drop-shadow-md">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 w-full px-4 sm:px-6 lg:px-8 xl:px-20 py-8 sm:py-12 lg:py-20">
+        <div className="order-2 lg:order-1 bg-gray w-full h-full drop-shadow-md">
           <div
-            className="pt-8 space-y-3 rounded-lg border border-none drop-shadow-md  px-2 py-4 sm:px-6 md:min-h-[600px]  Properties backdrop-blur-sm
+            className="pt-6 sm:pt-8 space-y-3 rounded-lg border border-none drop-shadow-md px-3 sm:px-4 lg:px-6 py-4 sm:py-6 min-h-[500px] sm:min-h-[600px] Properties backdrop-blur-sm
              bg-white 
             flex flex-col justify-between"
           >
-            <p className="text-xl font-medium">Order Summary</p>
-            <p className="text-gray-400">
+            <p className="text-lg sm:text-xl font-medium">Order Summary</p>
+            <p className="text-sm sm:text-base text-gray-400">
               Check your items. And select a suitable payment method
             </p>
             <div className="flex flex-col rounded-lg bg-white sm:flex-row">
               <img
-                className="m-1 mt-2 h-44 w-[200px] rounded-md  drop-shadow-md  border border-sm  object-contain object-center"
+                className="m-1 mt-2 h-36 sm:h-44 w-full sm:w-[200px] rounded-md drop-shadow-md border border-sm object-contain object-center"
                 src={singleVehicleDetail.image[0]}
                 alt=""
               />
-              <div className="flex w-full flex-col px-4 py-4">
-                <span className="font-semibold capitalize">
+              <div className="flex w-full flex-col px-2 sm:px-4 py-2 sm:py-4">
+                <span className="font-semibold capitalize text-sm sm:text-base">
                   <span></span> {singleVehicleDetail.model}
                 </span>
-                <span className="float-right text-gray-400">
+                <span className="float-right text-gray-400 text-xs sm:text-sm">
                   <span>Package : </span>
                   {singleVehicleDetail.base_package}
                 </span>
-                <span className="float-right text-gray-400">
+                <span className="float-right text-gray-400 text-xs sm:text-sm">
                   <span></span>
                   {singleVehicleDetail.fuel_type}
                 </span>
-                <span className="float-right text-gray-400">
+                <span className="float-right text-gray-400 text-xs sm:text-sm">
                   <span></span>
                   {singleVehicleDetail.transmition}
                 </span>
-                <span className="float-right text-gray-400">
+                <span className="float-right text-gray-400 text-xs sm:text-sm">
                   <span></span>
                   {singleVehicleDetail.registeration_number}
                 </span>
-                <p className="text-lg font-bold flex justify-start items-center">
+                <p className="text-base sm:text-lg font-bold flex justify-start items-center">
                   <span>
                     <MdCurrencyRupee />
                   </span>
@@ -268,24 +268,24 @@ const CheckoutPage = () => {
                 </p>
               </div>
             </div>
-            <div className=" cursor-pointer  rounded-lg drop-shadow-sm  border border-slate-50  p-4 mt-40 pt-10">
-              <div className="flex justify-around">
-                <div className="md:ml-5 min-h-[300px] ">
-                  <div className="mt-2 font-medium underline underline-offset-4 mb-5">
+            <div className="cursor-pointer rounded-lg drop-shadow-sm border border-slate-50 p-3 sm:p-4 mt-6 sm:mt-8 lg:mt-40 pt-6 sm:pt-10">
+              <div className="flex flex-col sm:flex-row sm:justify-around gap-4 sm:gap-0">
+                <div className="sm:ml-5 min-h-[200px] sm:min-h-[300px]">
+                  <div className="mt-2 font-medium underline underline-offset-4 mb-3 sm:mb-5 text-sm sm:text-base">
                     Pick up
                   </div>
                   <div className="mt-2 capitalize">
-                    <p className="text-black text-[14px] mt-2 leading-6">
+                    <p className="text-black text-xs sm:text-[14px] mt-2 leading-6">
                       {pickup_district
                         ? pickup_district
                         : "Pickup District Not selected"}
                     </p>
-                    <p className=" text-[14px] mt-2">
+                    <p className="text-xs sm:text-[14px] mt-2">
                       {pickup_location
                         ? pickup_location
                         : "Pickup Location Not Selected"}
                     </p>
-                    <div className="text-[14px] flex flex-col justify-start items-start  pr-2 gap-2 mt-2">
+                    <div className="text-xs sm:text-[14px] flex flex-col justify-start items-start pr-2 gap-2 mt-2">
                       <div className="flex justify-between gap-2 items-center">
                         <span>
                           <CiCalendarDate style={{ fontSize: 15 }} />
@@ -329,24 +329,24 @@ const CheckoutPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="ml-5">
-                  <div className="mt-2 font-medium underline underline-offset-4 mb-5">
+                <div className="sm:ml-5">
+                  <div className="mt-2 font-medium underline underline-offset-4 mb-3 sm:mb-5 text-sm sm:text-base">
                     Drop off
                   </div>
 
                   <div className="mt-2">
-                    <p className="text-black text-[14px] leading-6 mt-2">
+                    <p className="text-black text-xs sm:text-[14px] leading-6 mt-2">
                       {pickup_district
                         ? pickup_district
                         : "Pickup District Not Selected"}
                     </p>
-                    <p className=" text-[14px] mt-2">
+                    <p className="text-xs sm:text-[14px] mt-2">
                       {dropoff_location
                         ? dropoff_location
                         : "Dropoff Location not selected"}
                     </p>
-                    <div className="text-[14px] flex flex-col justify-start items-start pr-2 gap-2 mt-2">
-                      <div className="flex  justify-between gap-2 items-center">
+                    <div className="text-xs sm:text-[14px] flex flex-col justify-start items-start pr-2 gap-2 mt-2">
+                      <div className="flex justify-between gap-2 items-center">
                         <span>
                           <CiCalendarDate style={{ fontSize: 15 }} />
                         </span>
@@ -376,10 +376,10 @@ const CheckoutPage = () => {
                   </div>
                 </div>
               </div>
-              <div className=" rounded-lg flex justify-center items-center gap-2 text-[8px] drop-shadow-md  border border-sm  p-4">
+              <div className="rounded-lg flex justify-center items-center gap-2 text-[8px] drop-shadow-md border border-sm p-3 sm:p-4 mt-4">
                 <div>
                   <MdVerifiedUser
-                    style={{ fontSize: 50, color: "green", fill: "green" }}
+                    style={{ fontSize: 40, color: "green", fill: "green" }}
                   />
                 </div>
                 <div>
@@ -395,14 +395,14 @@ const CheckoutPage = () => {
         </div>
 
         {/* details */}
-        <div className="mt-10 bg-gray-50 px-4 pt-8 lg:mt-0 drop-shadow-md ">
-          <p className="text-xl font-medium">Payment Details</p>
-          <p className="text-gray-400">
+        <div className="order-1 lg:order-2 mt-6 lg:mt-10 bg-gray-50 px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 drop-shadow-md">
+          <p className="text-lg sm:text-xl font-medium">Payment Details</p>
+          <p className="text-sm sm:text-base text-gray-400">
             Complete your order by providing your payment details.
           </p>
 
           <form onSubmit={handleSubmit(handlePlaceOrder)}>
-            <div className="flex flex-col gap-y-8 my-4">
+            <div className="flex flex-col gap-y-4 sm:gap-y-6 lg:gap-y-8 my-4">
               {/* email */}
 
               <div>
@@ -502,7 +502,7 @@ const CheckoutPage = () => {
 
               {/* PinCode */}
               <div>
-                <div className="flex gap-6">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
                   <TextField
                     rows={4}
                     id="coupon"
@@ -517,8 +517,9 @@ const CheckoutPage = () => {
                     onClick={(e) => {
                       e.preventDefault(), handleCoupon();
                     }}
+                    className="w-full sm:w-auto"
                   >
-                    <div className="bg-black text-white px-8 py-4 rounded-md">
+                    <div className="bg-black text-white px-6 sm:px-8 py-3 sm:py-4 rounded-md text-center">
                       Apply
                     </div>
                   </button>
@@ -550,7 +551,7 @@ const CheckoutPage = () => {
             </div>
             <div className="mt-6 flex items-center justify-between">
               <p className="text-sm font-medium text-gray-900">Total</p>
-              <p className="text-2xl font-semibold text-gray-900 flex items-center justify-center">
+              <p className="text-xl sm:text-2xl font-semibold text-gray-900 flex items-center justify-center">
                 <span>
                   <FaIndianRupeeSign />{" "}
                 </span>
@@ -560,18 +561,18 @@ const CheckoutPage = () => {
 
             {isPageLoading ? (
               <button
-                className={`mt-4 mb-8 w-full rounded-md bg-gray-400 px-6 py-3 font-medium text-black`}
+                className={`mt-4 mb-6 sm:mb-8 w-full rounded-md bg-gray-400 px-6 py-3 font-medium text-black`}
                 disabled
               >
                 Processing ...
               </button>
             ) : (
               <button
-                className={`mt-4 mb-8 w-full rounded-md ${
+                className={`mt-4 mb-6 sm:mb-8 w-full rounded-md ${
                   paymentMethod === 'cash_on_delivery' 
                     ? 'bg-green-600 hover:bg-green-700' 
                     : 'bg-gray-900 hover:bg-gray-800'
-                } px-6 py-3 font-medium text-white transition-colors`}
+                } px-6 py-3 font-medium text-white transition-colors text-sm sm:text-base`}
               >
                 {paymentMethod === 'cash_on_delivery' 
                   ? "📋 Confirm Booking (Cash on Delivery)" 

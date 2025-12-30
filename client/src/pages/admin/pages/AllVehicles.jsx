@@ -18,12 +18,19 @@ import {
 function AllVehicles() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const { isAddVehicleClicked } = useSelector((state) => state.addVehicle);
 
   const [allVehicles, setVehicles] = useState([]);
   const { adminEditVehicleSuccess, adminAddVehicleSuccess, adminCrudError } =
     useSelector((state) => state.statusSlice);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   //show vehicles
   useEffect(() => {
@@ -70,6 +77,160 @@ function AllVehicles() {
   const handleEditVehicle = (vehicle_id) => {
     dispatch(setEditData({ _id: vehicle_id }));
     navigate(`/adminDashboard/editProducts?vehicle_id=${vehicle_id}`);
+  };
+
+  const getColumns = () => {
+    if (isMobile) {
+      return [
+        {
+          field: "image",
+          headerName: "Image",
+          width: 80,
+          renderCell: (params) => (
+            <img
+              src={params.value}
+              style={{
+                width: "50px",
+                height: "40px",
+                borderRadius: "6px",
+                objectFit: "cover",
+              }}
+              alt="vehicle"
+            />
+          ),
+        },
+        {
+          field: "name",
+          headerName: "Vehicle",
+          flex: 1,
+          minWidth: 120,
+          renderCell: (params) => (
+            <div>
+              <div className="font-bold text-xs">{params.row.company}</div>
+              <div className="text-xs text-gray-600">{params.value}</div>
+              <div className="text-xs text-gray-500">{params.row.registeration_number}</div>
+            </div>
+          ),
+        },
+        {
+          field: "actions",
+          headerName: "Actions",
+          width: 100,
+          renderCell: (params) => (
+            <div className="flex gap-1">
+              <Button 
+                onClick={() => handleEditVehicle(params.row.id)}
+                sx={{ 
+                  minWidth: 'auto', 
+                  padding: '4px',
+                  color: '#3b82f6',
+                  '&:hover': {
+                    backgroundColor: '#eff6ff',
+                  }
+                }}
+              >
+                <ModeEditOutlineIcon fontSize="small" />
+              </Button>
+              <Button 
+                onClick={() => handleDelete(params.row.id)}
+                sx={{ 
+                  minWidth: 'auto', 
+                  padding: '4px',
+                  color: '#ef4444',
+                  '&:hover': {
+                    backgroundColor: '#fef2f2',
+                  }
+                }}
+              >
+                <DeleteForeverIcon fontSize="small" />
+              </Button>
+            </div>
+          ),
+        },
+      ];
+    }
+
+    return [
+      {
+        field: "image",
+        headerName: "Image",
+        width: 120,
+        renderCell: (params) => (
+          <img
+            src={params.value}
+            style={{
+              width: "60px",
+              height: "45px",
+              borderRadius: "8px",
+              objectFit: "cover",
+            }}
+            alt="vehicle"
+          />
+        ),
+      },
+      {
+        field: "registeration_number",
+        headerName: "Registration Number",
+        width: 200,
+        flex: 1,
+      },
+      { 
+        field: "company", 
+        headerName: "Company", 
+        width: 180,
+        flex: 1,
+      },
+      { 
+        field: "name", 
+        headerName: "Vehicle Name", 
+        width: 200,
+        flex: 1,
+      },
+      {
+        field: "edit",
+        headerName: "Edit",
+        width: 80,
+        headerAlign: 'center',
+        align: 'center',
+        renderCell: (params) => (
+          <Button 
+            onClick={() => handleEditVehicle(params.row.id)}
+            sx={{ 
+              minWidth: 'auto', 
+              padding: '8px',
+              color: '#3b82f6',
+              '&:hover': {
+                backgroundColor: '#eff6ff',
+              }
+            }}
+          >
+            <ModeEditOutlineIcon fontSize="small" />
+          </Button>
+        ),
+      },
+      {
+        field: "delete",
+        headerName: "Delete",
+        width: 80,
+        headerAlign: 'center',
+        align: 'center',
+        renderCell: (params) => (
+          <Button 
+            onClick={() => handleDelete(params.row.id)}
+            sx={{ 
+              minWidth: 'auto', 
+              padding: '8px',
+              color: '#ef4444',
+              '&:hover': {
+                backgroundColor: '#fef2f2',
+              }
+            }}
+          >
+            <DeleteForeverIcon fontSize="small" />
+          </Button>
+        ),
+      },
+    ];
   };
 
   const columns = [
@@ -194,24 +355,27 @@ function AllVehicles() {
       {adminCrudError ? <Toaster/> : ""}     
         
       <div className="w-full h-full">
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <Header title="AllVehicles" />
         </div>
         
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <Box sx={{ height: 600, width: "100%" }}>
+          <Box sx={{ 
+            height: { xs: 400, sm: 500, md: 600 }, 
+            width: "100%" 
+          }}>
             <DataGrid
               rows={rows}
-              columns={columns}
+              columns={getColumns()}
               initialState={{
                 pagination: {
                   paginationModel: {
-                    pageSize: 8,
+                    pageSize: isMobile ? 5 : 8,
                   },
                 },
               }}
               pageSizeOptions={[5, 8, 10, 20]}
-              checkboxSelection
+              checkboxSelection={!isMobile}
               disableRowSelectionOnClick
               sx={{
                 ".MuiDataGrid-columnSeparator": {
@@ -224,12 +388,14 @@ function AllVehicles() {
                   borderBottom: "1px solid #f0f0f0",
                   fontWeight: "bold",
                   color: "#000000",
+                  fontSize: { xs: "12px", sm: "14px" },
                 },
                 "& .MuiDataGrid-columnHeaders": {
                   backgroundColor: "#f8fafc",
                   borderBottom: "2px solid #e2e8f0",
                   fontWeight: "bold",
                   color: "#000000",
+                  fontSize: { xs: "12px", sm: "14px" },
                   "& .MuiDataGrid-columnHeaderTitle": {
                     fontWeight: "bold",
                     color: "#000000",
@@ -242,6 +408,7 @@ function AllVehicles() {
                   "& .MuiTablePagination-root": {
                     fontWeight: "bold",
                     color: "#000000",
+                    fontSize: { xs: "12px", sm: "14px" },
                   },
                   "& .MuiTablePagination-selectLabel": {
                     fontWeight: "bold",

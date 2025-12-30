@@ -125,7 +125,7 @@ export default function Orders() {
   };
 
   return (
-    <div className="max-w-full mx-auto py-20 px-4" style={{ minWidth: '1400px' }}>
+    <div className="max-w-full mx-auto py-8 sm:py-12 lg:py-20 px-4 sm:px-6 lg:px-8">
       <UserOrderDetailsModal />
       
       {/* Back Button and Header */}
@@ -208,7 +208,6 @@ export default function Orders() {
               <div
                 className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow"
                 key={idx}
-                style={{ minWidth: '1300px' }}
               >
                 {/* Travel Type Header */}
                 <div className={`px-6 py-3 ${
@@ -240,17 +239,17 @@ export default function Orders() {
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-6">
                     {/* Vehicle Image */}
-                    <div className="lg:col-span-1">
+                    <div className="xl:col-span-1">
                       <img
                         alt={cur.vehicleDetails.name}
                         className="w-full h-48 object-contain bg-gray-50 rounded-lg"
                         src={cur.vehicleDetails.image[0]}
                       />
                       <div className="mt-3 text-center">
-                        <h3 className="font-bold text-lg text-black">
+                        <h3 className="font-bold text-base sm:text-lg text-black">
                           <strong>{cur.vehicleDetails.company} {cur.vehicleDetails.name || cur.vehicleDetails.model}</strong>
                         </h3>
                         <p className="text-sm font-bold text-gray-700"><strong>{cur.vehicleDetails.registeration_number}</strong></p>
@@ -258,8 +257,8 @@ export default function Orders() {
                     </div>
 
                     {/* Trip Details */}
-                    <div className="lg:col-span-3">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="xl:col-span-3">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
                         {/* Pickup Details */}
                         <div className="space-y-3">
                           <div className="flex items-center gap-2 text-green-600 font-bold">
@@ -314,14 +313,14 @@ export default function Orders() {
                       </div>
 
                       {/* Enhanced Pricing for Cross-State */}
-                      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center justify-between">
+                      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                           <div className="flex items-center gap-2">
                             <FaMoneyBillWave className="text-green-600" />
                             <span className="font-bold text-black"><strong>Total Amount</strong></span>
                           </div>
-                          <div className="text-right">
-                            <div className="flex items-center gap-1 text-3xl font-bold text-green-600">
+                          <div className="text-left sm:text-right">
+                            <div className="flex items-center gap-1 text-2xl sm:text-3xl font-bold text-green-600">
                               <MdCurrencyRupee />
                               <span><strong>{cur.bookingDetails.totalPrice}</strong></span>
                             </div>
@@ -334,9 +333,9 @@ export default function Orders() {
                         </div>
 
                         {/* Payment Status */}
-                        <div className="mt-3 flex items-center justify-between text-sm font-bold">
+                        <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 text-sm font-bold">
                           <span className="text-black"><strong>Payment Method: {cur.bookingDetails.paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' : 'Online Payment'}</strong></span>
-                          <span className={`px-2 py-1 rounded text-xs font-bold ${
+                          <span className={`px-2 py-1 rounded text-xs font-bold self-start sm:self-auto ${
                             cur.bookingDetails.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
                           }`}>
                             <strong>{cur.bookingDetails.paymentStatus === 'pending' ? 'Pay at Pickup' : 'Paid'}</strong>
@@ -345,9 +344,9 @@ export default function Orders() {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="mt-4 flex flex-wrap gap-3 justify-end">
+                      <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:justify-end">
                         <button
-                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => sendPdfToEmail(cur.bookingDetails._id)}
                           disabled={sendingPdf[cur.bookingDetails._id]}
                         >

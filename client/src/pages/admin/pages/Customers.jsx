@@ -250,31 +250,31 @@ const Customers = () => {
           </h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200" style={{ minWidth: '1200px' }}>
+          <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" style={{ minWidth: '200px' }}>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <strong>Customer</strong>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" style={{ minWidth: '220px' }}>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <strong>Contact Information</strong>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" style={{ minWidth: '100px' }}>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <strong>Customer Level</strong>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" style={{ minWidth: '120px' }}>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <strong>Total Bookings</strong>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" style={{ minWidth: '140px' }}>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <strong>Total Amount Spent</strong>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" style={{ minWidth: '130px' }}>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <strong>Last Booking Date</strong>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" style={{ minWidth: '120px' }}>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <strong>Date Joined</strong>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" style={{ minWidth: '150px' }}>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <strong>Actions</strong>
                 </th>
               </tr>
@@ -283,7 +283,7 @@ const Customers = () => {
               {filteredCustomers.length > 0 ? (
                 filteredCustomers.map((customer) => (
                   <tr key={customer._id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 whitespace-nowrap" style={{ minWidth: '200px' }}>
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <img
@@ -302,7 +302,7 @@ const Customers = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap" style={{ minWidth: '220px' }}>
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm font-bold text-gray-900">
                         <strong>{customer.email}</strong>
                       </div>
@@ -310,24 +310,24 @@ const Customers = () => {
                         <strong>{customer.phoneNumber || 'No phone'}</strong>
                       </div>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap" style={{ minWidth: '100px' }}>
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(customer)}`}>
                         <strong>{getCustomerLevel(customer)}</strong>
                       </span>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900" style={{ minWidth: '120px' }}>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                       <strong>{customer.totalBookings || 0}</strong>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-bold" style={{ minWidth: '140px' }}>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">
                       <strong>{formatCurrency(customer.totalSpent || 0)}</strong>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-500" style={{ minWidth: '130px' }}>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-500">
                       <strong>{customer.lastBooking ? customer.lastBooking.toLocaleDateString() : 'Never'}</strong>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-500" style={{ minWidth: '120px' }}>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-500">
                       <strong>{new Date(customer.createdAt).toLocaleDateString()}</strong>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-bold" style={{ minWidth: '150px' }}>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-bold">
                       <button className="text-indigo-600 hover:text-indigo-900 mr-3 font-bold">
                         <strong>View Details</strong>
                       </button>

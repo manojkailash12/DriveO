@@ -12,10 +12,12 @@ import {
   Financial,
   AdminProfile,
 } from "../pages";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
 import EnhancedAdminDashboard from "../pages/EnhancedAdminDashboard.jsx";
 import Bookings from "../components/Bookings.jsx";
 import TravelAnalytics from "../pages/TravelAnalytics.jsx";
+import { setActiveMenu } from "../../../redux/adminSlices/adminDashboardSlice/index.js";
 
 function AdminDashNew() {
   const { activeMenu } = useSelector((state) => state.adminDashboardSlice);

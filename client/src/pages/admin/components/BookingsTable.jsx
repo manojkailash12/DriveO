@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
-import { FaDownload, FaFilePdf, FaFileExcel } from 'react-icons/fa';
+import { FaFilePdf, FaFileExcel, FaMapMarkedAlt, FaMoneyBillWave } from 'react-icons/fa';
+import { MdCurrencyRupee } from "react-icons/md";
+import { CiLocationOn, CiCalendarDate } from "react-icons/ci";
 
 // Simple distance calculation for common routes
 const getEstimatedDistance = (pickup, dropoff) => {
@@ -36,6 +38,13 @@ const getEstimatedDistance = (pickup, dropoff) => {
 const BookingsTable = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchBookings = async () => {
     try {
@@ -160,6 +169,108 @@ const BookingsTable = () => {
       window.URL.revokeObjectURL(url);
     }
   };
+
+  // Mobile Card View Component
+  const renderMobileCardView = () => (
+    <div className="md:hidden space-y-4">
+      {bookings.map((booking) => {
+        const distance = booking.estimatedDistance || 
+                        getEstimatedDistance(booking.pickUpLocation || booking.pickupLocation, booking.dropOffLocation) ||
+                        null;
+        
+        const getStatusColor = (status) => {
+          switch (status?.toLowerCase()) {
+            case 'booked': return 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'ontrip': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'tripcompleted': return 'bg-green-100 text-green-800 border-green-200';
+            case 'canceled': return 'bg-red-100 text-red-800 border-red-200';
+            case 'overdue': return 'bg-orange-100 text-orange-800 border-orange-200';
+            default: return 'bg-gray-100 text-gray-800 border-gray-200';
+          }
+        };
+
+        return (
+          <div key={booking._id} className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
+            {/* Header with vehicle image and basic info */}
+            <div className="flex items-start gap-3 mb-3">
+              <img
+                src={booking.vehicleDetails?.image?.[0] || booking.vehicleId?.image?.[0] || '/placeholder-car.jpg'}
+                alt="vehicle"
+                className="w-16 h-12 rounded object-contain bg-gray-50"
+              />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-sm text-gray-900 truncate">
+                  {`${booking.vehicleDetails?.company || ''} ${booking.vehicleDetails?.name || booking.vehicleDetails?.model || ''}`.trim() || 
+                   `${booking.vehicleId?.company || ''} ${booking.vehicleId?.name || booking.vehicleId?.model || ''}`.trim() || 
+                   'Unknown Vehicle'}
+                </h3>
+                <p className="text-xs text-gray-600 font-semibold">
+                  ID: {booking._id?.slice(-8) || 'N/A'}
+                </p>
+                <p className="text-xs text-gray-600 font-semibold">
+                  Customer: {booking.userId?.name || booking.userId?.username || 'Unknown'}
+                </p>
+              </div>
+              <span className={`px-2 py-1 rounded-full text-xs font-bold border ${getStatusColor(booking.status || booking.bookingStatus)}`}>
+                {booking.status || booking.bookingStatus || 'Pending'}
+              </span>
+            </div>
+
+            {/* Trip Details */}
+            <div className="space-y-2 mb-3">
+              <div className="flex items-center gap-2 text-sm">
+                <CiLocationOn className="text-green-600 flex-shrink-0" />
+                <span className="font-semibold text-gray-700 truncate">
+                  {booking.pickUpLocation || booking.pickupLocation || 'Not specified'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CiLocationOn className="text-red-600 flex-shrink-0" />
+                <span className="font-semibold text-gray-700 truncate">
+                  {booking.dropOffLocation || 'Not specified'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CiCalendarDate className="text-blue-600 flex-shrink-0" />
+                <span className="font-semibold text-gray-700">
+                  {new Date(booking.pickupDate).toLocaleDateString()} - {new Date(booking.dropOffDate).toLocaleDateString()}
+                </span>
+              </div>
+              {distance && (
+                <div className="flex items-center gap-2 text-sm">
+                  <FaMapMarkedAlt className="text-purple-600 flex-shrink-0" />
+                  <span className="font-semibold text-blue-600">
+                    {typeof distance === 'number' ? `${distance} km` : distance}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Amount and Status Change */}
+            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-1">
+                <MdCurrencyRupee className="text-green-600" />
+                <span className="font-bold text-green-600">
+                  {(booking.totalAmount || booking.totalPrice || 0).toLocaleString()}
+                </span>
+              </div>
+              <select
+                className="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                value={booking.status || booking.bookingStatus || 'Pending'}
+                onChange={(e) => handleStatusChange(e, { id: booking._id })}
+              >
+                {["notBooked", "booked", "onTrip", "notPicked", "canceled", "overDue", "tripCompleted"].map((status) => (
+                  <option key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 
   //all bookings
   useEffect(() => {
@@ -357,94 +468,98 @@ const BookingsTable = () => {
   return (
     <>
       {/* Export Buttons */}
-      <div className="flex justify-end gap-3 mb-4">
-        <button
-          onClick={exportToExcel}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md"
-        >
-          <FaFileExcel />
-          Export Excel
-        </button>
-        <button
-          onClick={exportToPDF}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-md"
-        >
-          <FaFilePdf />
-          Export PDF
-        </button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+        <h3 className="text-lg font-bold text-black">
+          All Bookings ({bookings.length} total)
+        </h3>
+        <div className="flex gap-3">
+          <button
+            onClick={exportToExcel}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md text-sm"
+          >
+            <FaFileExcel />
+            <span className="hidden sm:inline">Export Excel</span>
+            <span className="sm:hidden">Excel</span>
+          </button>
+          <button
+            onClick={exportToPDF}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-md text-sm"
+          >
+            <FaFilePdf />
+            <span className="hidden sm:inline">Export PDF</span>
+            <span className="sm:hidden">PDF</span>
+          </button>
+        </div>
       </div>
 
-      {/* Enhanced Table Container */}
-      <div className="w-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b border-gray-200">
-          <h3 className="text-lg font-bold text-black">
-            All Bookings ({bookings.length} total)
-          </h3>
+      {/* Mobile Card View */}
+      {isMobile ? renderMobileCardView() : (
+        /* Desktop Table View */
+        <div className="w-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+          <div className="p-4">
+            <Box sx={{ height: 600, width: '100%' }}>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 10,
+                    },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 25, 50]}
+                disableRowSelectionOnClick
+                sx={{
+                  ".MuiDataGrid-columnSeparator": {
+                    display: "none",
+                  },
+                  "&.MuiDataGrid-root": {
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                  },
+                  ".MuiDataGrid-columnHeaders": {
+                    backgroundColor: "#f9fafb",
+                    borderBottom: "2px solid #e5e7eb",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    color: "#000000",
+                    "& .MuiDataGrid-columnHeaderTitle": {
+                      fontWeight: "bold",
+                      color: "#000000",
+                    },
+                  },
+                  ".MuiDataGrid-cell": {
+                    borderBottom: "1px solid #f3f4f6",
+                    fontSize: "13px",
+                    fontWeight: "bold",
+                    color: "#000000",
+                  },
+                  ".MuiDataGrid-row:hover": {
+                    backgroundColor: "#f8fafc",
+                  },
+                  ".MuiDataGrid-footerContainer": {
+                    borderTop: "2px solid #e5e7eb",
+                    backgroundColor: "#f9fafb",
+                    "& .MuiTablePagination-root": {
+                      fontWeight: "bold",
+                      color: "#000000",
+                    },
+                    "& .MuiTablePagination-selectLabel": {
+                      fontWeight: "bold",
+                      color: "#000000",
+                    },
+                    "& .MuiTablePagination-displayedRows": {
+                      fontWeight: "bold",
+                      color: "#000000",
+                    },
+                  },
+                }}
+              />
+            </Box>
+          </div>
         </div>
-        
-        <div className="p-4">
-          <Box sx={{ height: 600, width: '100%' }}>
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 10,
-                  },
-                },
-              }}
-              pageSizeOptions={[5, 10, 25, 50]}
-              disableRowSelectionOnClick
-              sx={{
-                ".MuiDataGrid-columnSeparator": {
-                  display: "none",
-                },
-                "&.MuiDataGrid-root": {
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "8px",
-                },
-                ".MuiDataGrid-columnHeaders": {
-                  backgroundColor: "#f9fafb",
-                  borderBottom: "2px solid #e5e7eb",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  color: "#000000",
-                  "& .MuiDataGrid-columnHeaderTitle": {
-                    fontWeight: "bold",
-                    color: "#000000",
-                  },
-                },
-                ".MuiDataGrid-cell": {
-                  borderBottom: "1px solid #f3f4f6",
-                  fontSize: "13px",
-                  fontWeight: "bold",
-                  color: "#000000",
-                },
-                ".MuiDataGrid-row:hover": {
-                  backgroundColor: "#f8fafc",
-                },
-                ".MuiDataGrid-footerContainer": {
-                  borderTop: "2px solid #e5e7eb",
-                  backgroundColor: "#f9fafb",
-                  "& .MuiTablePagination-root": {
-                    fontWeight: "bold",
-                    color: "#000000",
-                  },
-                  "& .MuiTablePagination-selectLabel": {
-                    fontWeight: "bold",
-                    color: "#000000",
-                  },
-                  "& .MuiTablePagination-displayedRows": {
-                    fontWeight: "bold",
-                    color: "#000000",
-                  },
-                },
-              }}
-            />
-          </Box>
-        </div>
-      </div>
+      )}
     </>
   );
 };
