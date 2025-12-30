@@ -607,5 +607,5 @@ export const generateBookingReceipt = (bookingDetails, vehicleDetails, userDetai
   return pdfReceiptService.generateBookingReceipt(bookingDetails, vehicleDetails, userDetails);
 };
 
-// Auto-cleanup old PDFs on service start
-pdfReceiptService.cleanupOldPDFs();
+// Auto-cleanup old PDFs on service start (disabled for serverless)
+// pdfReceiptService.cleanupOldPDFs();
