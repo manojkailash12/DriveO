@@ -20,22 +20,16 @@ const __dirname = path.dirname(__filename);
 // Load environment variables - Vercel handles this automatically
 dotenv.config();
 
-// Fallback for missing environment variables
-if (!process.env.MONGO_URI) {
-  console.error('MONGO_URI environment variable is not set!');
-  process.exit(1);
-}
-
 const App = express();
 
 App.use(express.json());
 App.use(cookieParser())
 
-// Serve static files for uploaded images (disabled for serverless)
-// App.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve static files for uploaded images
+App.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve static files for offline PDFs (disabled for serverless)
-// App.use('/offline-pdfs', express.static(path.join(__dirname, 'offline-pdfs')));
+// Serve static files for offline PDFs
+App.use('/offline-pdfs', express.static(path.join(__dirname, 'offline-pdfs')));
 
 const port = process.env.PORT || 3000;
 
@@ -47,25 +41,19 @@ console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Found' : 'Not found');
 console.log('ACCESS_TOKEN:', process.env.ACCESS_TOKEN ? 'Found' : 'Not found');
 console.log('REFRESH_TOKEN:', process.env.REFRESH_TOKEN ? 'Found' : 'Not found');
 
-// MongoDB connection with serverless optimization
+// MongoDB connection with improved error handling and optimized settings
 const connectDB = async () => {
   try {
-    // Check if already connected
-    if (mongoose.connection.readyState === 1) {
-      console.log('MongoDB already connected');
-      return mongoose.connection;
-    }
-
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      // Serverless optimized settings
-      serverSelectionTimeoutMS: 30000, // 30 seconds
-      socketTimeoutMS: 30000, // 30 seconds
-      connectTimeoutMS: 30000, // 30 seconds
+      // Connection timeout settings
+      serverSelectionTimeoutMS: 60000, // 60 seconds
+      socketTimeoutMS: 60000, // 60 seconds
+      connectTimeoutMS: 60000, // 60 seconds
       
-      // Connection pool settings for serverless
-      maxPoolSize: 5, // Reduced for serverless
-      minPoolSize: 1,
-      maxIdleTimeMS: 10000, // Shorter idle time
+      // Connection pool settings
+      maxPoolSize: 20, // Increased pool size
+      minPoolSize: 5,
+      maxIdleTimeMS: 30000,
       
       // Retry settings
       retryWrites: true,
@@ -77,41 +65,53 @@ const connectDB = async () => {
     // Set mongoose buffer settings (only valid options)
     mongoose.set('bufferCommands', false);
     
-    // Disable offline queue processor for serverless environment
-    if (process.env.NODE_ENV !== 'production') {
-      console.log("🔄 Starting offline queue processor...");
-      startQueueProcessor();
-    } else {
-      console.log("📦 Serverless mode: Queue processor disabled");
-    }
+    // Start offline queue processor after DB connection
+    console.log("🔄 Starting offline queue processor...");
+    startQueueProcessor();
     
     return conn;
   } catch (error) {
     console.error("MongoDB connection error:", error);
-    throw error; // Let Vercel handle the error
+    console.error("Retrying connection in 10 seconds...");
+    setTimeout(connectDB, 10000);
   }
 };
 
-// Handle connection events (simplified for serverless)
+// Handle connection events
 mongoose.connection.on('connected', () => {
   console.log('Mongoose connected to MongoDB');
 });
 
 mongoose.connection.on('error', (err) => {
   console.error('Mongoose connection error:', err);
+  // Attempt to reconnect
+  setTimeout(connectDB, 5000);
 });
 
 mongoose.connection.on('disconnected', () => {
   console.log('Mongoose disconnected from MongoDB');
+  // Attempt to reconnect
+  setTimeout(connectDB, 5000);
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  try {
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed through app termination');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error during graceful shutdown:', error);
+    process.exit(1);
+  }
 });
 
 // Connect to database
 connectDB();
 
-// For serverless, don't start server with listen
-// App.listen(port, () => {
-//   console.log(`server listening on port ${port}!`);
-// });
+App.listen(port, () => {
+  console.log(`server listening on port ${port}!`);
+});
 
 const allowedOrigins = [
   'https://rent-a-ride-two.vercel.app', 
@@ -136,23 +136,6 @@ App.get('/api/test', (req, res) => {
     message: 'Backend connected successfully!', 
     timestamp: new Date().toISOString(),
     status: 'OK'
-  });
-});
-
-// Root route handler
-App.get('/', (req, res) => {
-  res.json({
-    message: 'DriveO Backend API is running!',
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    endpoints: {
-      health: '/api/health',
-      test: '/api/test',
-      auth: '/api/auth',
-      user: '/api/user',
-      admin: '/api/admin',
-      vendor: '/api/vendor'
-    }
   });
 });
 

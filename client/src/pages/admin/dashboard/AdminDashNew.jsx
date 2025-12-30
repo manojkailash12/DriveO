@@ -17,7 +17,7 @@ import { useState } from "react";
 import EnhancedAdminDashboard from "../pages/EnhancedAdminDashboard.jsx";
 import Bookings from "../components/Bookings.jsx";
 import TravelAnalytics from "../pages/TravelAnalytics.jsx";
-import { setActiveMenu } from "../../../redux/adminSlices/adminDashboardSlice/index.js";
+import { showSidebarOrNot } from "../../../redux/adminSlices/adminDashboardSlice/DashboardSlice.jsx";
 
 function AdminDashNew() {
   const { activeMenu } = useSelector((state) => state.adminDashboardSlice);
